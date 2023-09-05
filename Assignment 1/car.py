@@ -79,8 +79,8 @@ class Car:
     def pickUpCustomer(self, customer_index):
         self.customer_wait_queue.remove(customer_index)
         self.customer_picked_up_queue.append(customer_index)
-        print("wait",  self.customer_wait_queue)
-        print("pickup",  self.customer_picked_up_queue)
+        # print("wait",  self.customer_wait_queue)
+        # print("pickup",  self.customer_picked_up_queue)
 
     def dropOffCustomer(self, customer_index):
         self.capacity -= 1
@@ -263,7 +263,7 @@ class Agent:
             customer_pick_up_node = self.customer_array[customer_index].pick_up_node
 
             new_service_path = self.graph.computeAStarPath(car_current_node, customer_pick_up_node)
-            print(customer_index, customer_pick_up_node, new_service_path)
+            # print(customer_index, customer_pick_up_node, new_service_path)
             
             if car_current_node != new_service_path[0]:
                 new_service_path.remove(car_current_node)
