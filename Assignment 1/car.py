@@ -397,11 +397,10 @@ if __name__ == "__main__":
     print("-------------------------DISCLOSURE---------------------------------------\n")
     print("")
     print("MY PROGRAM DOES NOT SHOW THE CURRENTLY SERVING CUSTOMER IN THE WAIT QUEUE\n")
-    print("SO FOR TICK 3 SERVE QUEUE FOR VAN1 IS [C1,C3,C5,C6,C4]\n")
     print("INSTEAD OF HAVING S1={(id1,p,8),(id1,d,9)} AS SERVICE QUEUE FOR TICK 1\n")
     print("THIS PROGRAM USES INDEX OF CUSTOMER(STARTING FROM 0) LIKE [0] FOR SERVICE QUEUE IN TICK1\n")
     print("THE SERVICE QUEUE IS ONLY UPDATED AND PRINTED AS LONG AS THERE IS REQUEST FOR CUSTOMER\n")
-    print("BUT C1 IS ALREADY BEING SERVED SO IT IS NOT IN WAIT QUEUE SO MY WAIT QUEUE IS [C2,C4,C5,C3](PROGRAM COUNTS FROM 0 NOT 1)\n")
+    print("BUT C1 IS ALREADY BEING SERVED SO IT IS NOT IN WAIT QUEUE SO MY WAIT QUEUE IS [C2,C4,C5,C3](PROGRAM COUNTS CUSTOMER AND CAR FROM 0 NOT 1)\n")
     print("CLOCK TICK STARTS IN 0 NOT 1\n")
     print("------------------------------------------------------------------------------\n")
 
@@ -509,14 +508,14 @@ if __name__ == "__main__":
     del agent
     
 
-# For R3
-# Average distance covered =  31.156666666666677
-# Average no of trips =  19.733333333333334
+# For R3 
+# Average distance covered =  29.070000000000025
+# Average no of trips =  19.633333333333334
 
-# For R4
-# Average distance covered =  15.326666666666679
-# Average no of trips =  9.8333333
+# For R4 Best case result
+# Average distance covered =  16.289999999999996
+# Average no of trips =  9.83
 
-# R5
+# R5 Best case result 
 # Average distance covered =  13.725000000000021
 # Average no of trips =  9.883333333333334
