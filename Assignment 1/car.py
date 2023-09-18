@@ -306,7 +306,7 @@ class Agent:
         if min_distance_car_index == -1:
             # no car to take in customer
             # let this tick continue without picking up customer
-            print("ALL CARS FULL")
+            print("All vans are full, please try again in 15 minutes")
         else:
             print("\nCar ", min_distance_car_index, "allocated to customer", customer_index)
             self.car_array[min_distance_car_index].pickUpCustomerRequest(customer_index)
@@ -322,7 +322,7 @@ class Agent:
         if min_distance_car_index == -1:
             # no car to take in customer
             # let this tick continue without picking up customer
-            print("ALL CARS FULL")
+            print("All vans are full, please try again in 15 minutes")
         else:
             # print("Car ", min_distance_car_index, "allocated to customer", customer_index)
             self.car_array[min_distance_car_index].pickUpCustomerRequest(customer_index)
