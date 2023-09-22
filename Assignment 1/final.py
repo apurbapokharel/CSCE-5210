@@ -205,7 +205,6 @@ class Agent:
             current_servicing_customer_drop_off_node = self.customer_array[current_servicing_customer_index].drop_off_node
 
         if car_current_node == current_servicing_customer_drop_off_node:
-            # print("car drops off current serving customer")
             car_object.dropOffCustomer(current_servicing_customer_index)
 
         # need to check for same dropoff points iteratively
@@ -213,11 +212,9 @@ class Agent:
             try:
                 customer_index = car_object.customer_picked_up_queue[i]
             except:
-                # print("-----------------------Pickedup queue empty breaking...--------------------------------")
                 break
             pickup_customer_drop_off_point = self.customer_array[customer_index].drop_off_node
             if car_current_node == pickup_customer_drop_off_point:
-                # print("car drops off pickedup customer")
                 car_object.dropOffCustomer(customer_index)
 
 
@@ -230,7 +227,6 @@ class Agent:
             next_in_queue_customer_pick_up_node = self.customer_array[next_in_queue_customer_index].pick_up_node
 
             if car_current_node == next_in_queue_customer_pick_up_node and capacity <=5:
-                # print("car picks up a waiting customer index ", next_in_queue_customer_index)
                 car_object.pickUpCustomer(next_in_queue_customer_index)
                 capacity += 1
                 next_in_queue_customer_index_length -= 1
@@ -254,46 +250,36 @@ class Agent:
             customer_pick_up_node = self.customer_array[customer_index].pick_up_node
             new_service_path = self.graph.computeAStarPath(car_current_node, customer_pick_up_node)
             
-            # if car_current_node != new_service_path[0]:
-            #     new_service_path.remove(car_current_node)
-
             if len(new_service_path) != 1:
                 new_service_path.remove(car_current_node)
             car_object.current_service_path = new_service_path
-            # print(" The newly assigned service path is", new_service_path)
             return new_service_path[0]
         else:
             car_object.current_service_path.remove(car_current_node)                
             updated_service_path = car_object.current_service_path
             if len(updated_service_path) == 0:
-                # print("Service path ended need a new path")
                 # either reached pick up or drop off point
                 # update accordingly
                 if len(car_object.customer_picked_up_queue) != 0:
-                    # serve the 1st from picked up queue
-                    # print("Just picked up or already picked customer need to drop them off")
+                    # Just picked up or already picked customer need to drop them off
                     first_queue_customer_index = car_object.customer_picked_up_queue[0]
                     first_queue_customer_drop_off_node = self.customer_array[first_queue_customer_index].drop_off_node
                     car_object.updateCurrentlyServingCustomer()
                     new_service_path = self.graph.computeAStarPath(car_current_node, first_queue_customer_drop_off_node)
                     new_service_path.remove(car_current_node)
                     car_object.current_service_path = new_service_path
-                    # print(" The newly assigned service path is 2", new_service_path)
                     return new_service_path[0]
                 else:
                     if len(car_object.customer_wait_queue) != 0:
                         # goto pickup first from wait queue/service queue if present
-                        # print("need to go and pick up from wait queue")
                         first_wait_queue_customer_index = car_object.customer_wait_queue[0]
                         fist_wait_queue_customer_pick_up_node = self.customer_array[first_wait_queue_customer_index].pick_up_node
                         new_service_path = self.graph.computeAStarPath(car_current_node, fist_wait_queue_customer_pick_up_node)
                         new_service_path.remove(car_current_node)
                         car_object.current_service_path = new_service_path
-                        # print(" The newly assigned service path is 3", new_service_path)
                         return new_service_path[0]
             else:
                 # continue movement along the service path
-                # print("Continue on the same service path")
                 return updated_service_path[0]
 
     def processNewCustomerRequestSimulation(self, customer_objet, customer_index):
@@ -304,8 +290,6 @@ class Agent:
         self.customer_array.append(customer_objet)
         min_distance_car_index = self.getCarForCustomer(customer_index)
         if min_distance_car_index == -1:
-            # no car to take in customer
-            # let this tick continue without picking up customer
             print("All vans are full, please try again in 15 minutes")
         else:
             print("\nCar ", min_distance_car_index, "allocated to customer", customer_index)
@@ -321,7 +305,6 @@ class Agent:
         min_distance_car_index = self.getCarForCustomer(customer_index)
         if min_distance_car_index == -1:
             # no car to take in customer
-            # let this tick continue without picking up customer
             print("All vans are full, please try again in 15 minutes")
         else:
             # print("Car ", min_distance_car_index, "allocated to customer", customer_index)
@@ -391,7 +374,6 @@ class Agent:
             no_of_trips += car_object.no_of_trips
         return no_of_trips/len(self.car_array)
 
-    
 if __name__ == "__main__":
 
     print("-------------------------DISCLOSURE---------------------------------------\n")
@@ -509,8 +491,8 @@ if __name__ == "__main__":
     
 
 # For R3 
-# Average distance covered =  29.070000000000025
-# Average no of trips =  19.633333333333334
+# Average distance covered = 29.07
+# Average no of trips =  19.63
 
 # For R4 Best case result
 # Average distance covered =  16.289999999999996
