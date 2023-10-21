@@ -7,24 +7,66 @@ import numpy as np
 
 class Graph:
     def __init__(self, no_of_nodes, connectivity, increase, seed):
-        while 1:
-            self.graph=nx.gnp_random_graph(no_of_nodes, connectivity, seed, True)  
-            # print("CONNECTION", nx.is_weakly_connected(self.graph))
-            if nx.is_weakly_connected(self.graph):
-                break
-            else:
-                connectivity += increase
-                # seed += 500
+        self.generateGraph(no_of_nodes, connectivity, increase, seed)
 
-        print('before removing', self.graph.edges())
-        #remove backflow
-        for u in self.graph.nodes():
-            adj_list = self.graph.adj[u]
-            for nbr,datdict in adj_list.copy().items():
-                print (u,nbr)
-                if (u>nbr) and self.graph.has_edge(u,nbr): 
-                    self.graph.remove_edge(u,nbr) # prune reverse edges from graph
-        print('after removing back flow', self.graph.edges())
+    def generateGraph(self, no_of_nodes, connectivity, increase, seed):
+        self.no_of_nodes = no_of_nodes
+        self.connectivity = connectivity
+        self.increase = increase
+        self.seed = seed
+
+        # while 1:
+        #     self.graph=nx.gnp_random_graph(no_of_nodes, connectivity, seed, True)  
+        #     # print("CONNECTION", nx.is_weakly_connected(self.graph))
+
+        #     #add flow and capacity at random
+        #     for u, v in self.graph.edges():
+        #         capacity=random.randint(1,10)
+        #         flow=random.randint(1,capacity)
+        #         # print('u- v flow - capacity', u, v, flow,capacity)
+        #         self.graph.add_edges_from([(u, v, {'flow':flow }), (u, v,{'capacity': capacity})])
+
+        #     self.graph_flow_edges = nx.get_edge_attributes(self.graph, 'flow')
+        #     self.graph_capacity_edges = nx.get_edge_attributes(self.graph, 'capacity')
+
+        #     # remove any inflow into the sink node
+        #     # remove outflow from the source nodes
+        #     for u,v in self.graph_flow_edges:
+        #         if v == 0 or u == no_of_nodes - 1:
+        #             self.graph.remove_edge(u,v) # prune reverse edges from graph
+
+        #     # initialize a dictionary
+        #     self.occurence_dictionary = {}
+        #     for u in self.graph.nodes():
+        #         self.occurence_dictionary[u] = 0
+        #     # print('after')
+
+        #     #assign values based on outflows from each node
+        #     edge_labels = nx.get_edge_attributes(self.graph, 'flow')                                   
+        #     for u,v in edge_labels:
+        #         # print('u v w', u, v) 
+        #         value = self.occurence_dictionary[u]
+        #         self.occurence_dictionary[u] = value + 1
+        #     # print(self.occurence_dictionary)
+
+        #     loop_again = 0
+        #     for u in self.occurence_dictionary:
+        #         if u == 0 or u==no_of_nodes-1:
+        #             continue
+        #         else:
+        #             #check at lease one outflow from each node
+        #             value = self.occurence_dictionary[u]
+        #             if value == 0:
+        #                 print("Generating another graph")
+        #                 # connectivity += increase
+        #                 seed += increase
+        #                 increase += 50
+        #                 loop_again = 1
+        #     if loop_again != 1:
+        #         break
+
+        self.graph=nx.gnp_random_graph(no_of_nodes, connectivity, seed, True)  
+        # print("CONNECTION", nx.is_weakly_connected(self.graph))
 
         #add flow and capacity at random
         for u, v in self.graph.edges():
@@ -36,58 +78,68 @@ class Graph:
         self.graph_flow_edges = nx.get_edge_attributes(self.graph, 'flow')
         self.graph_capacity_edges = nx.get_edge_attributes(self.graph, 'capacity')
 
-        #insure the conservation is maintained
-        inflow = [0 for i in range(no_of_nodes)] #an array of zeros
+        # remove any inflow into the sink node
+        # remove outflow from the source nodes
+        for u,v in self.graph_flow_edges:
+            if v == 0 or u == no_of_nodes - 1:
+                self.graph.remove_edge(u,v) # prune reverse edges from graph
+
+        # initialize a dictionary
+        self.occurence_dictionary = {}
         for u in self.graph.nodes():
-            e_in = self.graph.in_edges(u)
-            e_out = self.graph.out_edges(u)
-            # print("u is", u)
-            # print('ein', e_in)
-            # print('e_out', e_out)
-            if len(e_in) != 0 and len(e_out) != 0:
-                #check and conserve flow
-                for x,y in e_in:
-                    search_tuple = (x,y)
-                    result_tuple = self.getEdgeFlowAndCapacity(search_tuple)
-                    inflow[y] += result_tuple[0] 
-                    print(result_tuple[0])
-                sum = inflow[u]
-                edge_num = 0
-                for u,w in e_out:
-                    # print("chya",u,w)
-                    search_tuple = (u,w)
-                    result_tuple = self.getEdgeFlowAndCapacity(search_tuple)
-                    capacity = result_tuple[1]
-                    if (edge_num < len(e_out) - 1):
-                        # print("in - sum", sum)
-                        while 1:
-                            val = int(random.uniform(0,1) * sum)
-                            if val <= capacity  and val <= sum:
-                                # print("breakingggg")
-                                break
-                        sum = sum - val
-                        # print('updated ', u , w , val, sum)
-                        self.updateFlow(u,w, val, capacity)
-                        edge_num = edge_num + 1
-                    else:
-                        print("inn", sum , capacity)
-                        if sum > capacity:
-                            # print("in hereeee")
-                            #change the capacity 
-                            difference = sum - capacity
-                            factor = random.randint(difference, difference + 9)
-                            self.updateFlow(u,w, sum, capacity + factor)
-                            # print('changed ', u , w , sum)
-                        else:
-                            self.updateFlow(u,w, sum, capacity)
+            self.occurence_dictionary[u] = 0
+        # print('after')
+
+        #assign values based on outflows from each node
+        edge_labels = nx.get_edge_attributes(self.graph, 'flow')                                   
+        for u,v in edge_labels:
+            # print('u v w', u, v) 
+            value = self.occurence_dictionary[u]
+            self.occurence_dictionary[u] = value + 1
+        # print(self.occurence_dictionary)
+
+        #remove back flows
+        remove_list = []
+        for u,v in edge_labels:
+            # print('in ', u ,v)
+            # print('remove list', remove_list)
+            search_tuple = (v,u)
+            
+            continue_status = 0
+            for i in range(len(remove_list)):
+                if remove_list[i] == (u,v):
+                    # print("continue")
+                    continue_status = 1
+            if continue_status == 1:
+                continue
+            else:
+                try:
+                    if edge_labels[search_tuple]:
+                        remove_list.append(search_tuple)
+                except:
+                    continue
+                    # print("does not exist")
         
+        # for u, v in self.graph.edges():
+        #     search_tuple = (u,v)
+        #     result_flow = self.getEdgeFlowAndCapacity(search_tuple)
+        #     print("u,v,flow, capacity", u,v,result_flow[0], result_flow[1])
+        # print("remove list", remove_list)
+      
+        for u,v in remove_list:
+            # for every u,v there is also a v,u in the list
+            u_outflow = self.occurence_dictionary[u]
+            v_outflow = self.occurence_dictionary[v]
+            if u_outflow > v_outflow:
+                self.graph.remove_edge(u,v)
+                self.occurence_dictionary[u] = self.occurence_dictionary[u] - 1
+            else:
+                self.graph.remove_edge(v,u)
+                self.occurence_dictionary[v] = self.occurence_dictionary[v] - 1
+       
         self.graph_flow_edges = nx.get_edge_attributes(self.graph, 'flow')
         self.graph_capacity_edges = nx.get_edge_attributes(self.graph, 'capacity')
-        for u, v in self.graph.edges():
-            search_tuple = (u,v)
-            result_flow = self.getEdgeFlowAndCapacity(search_tuple)
-            print("u,v,flow, capacity", u,v,result_flow[0], result_flow[1])
-        self.no_of_nodes = self.graph.number_of_nodes()
+       
         path_iterator = nx.all_simple_edge_paths(self.graph, source=0, target=no_of_nodes - 1, cutoff=9)
         self.path = []
         for p in path_iterator:
@@ -112,6 +164,100 @@ class Graph:
                 out_flow += flow[0]
         return [in_flow, out_flow]
             
+    def preserveConservation(self):
+        count = 0
+        while 1:
+            # print("top")
+            count +=1
+            #insure the conservation is maintained
+            # print("inside")
+            inflow = [0 for i in range(self.no_of_nodes)] #an array of zeros
+            for u in self.graph.nodes():
+                e_in = self.graph.in_edges(u)
+                e_out = self.graph.out_edges(u)
+                # print("u is", u)
+                # print('ein', e_in)
+                # print('e_out', e_out)
+                if len(e_in) != 0 and len(e_out) != 0:
+                    #check and conserve flow
+                    for x,y in e_in:
+                        search_tuple = (x,y)
+                        result_tuple = self.getEdgeFlowAndCapacity(search_tuple)
+                        inflow[y] += result_tuple[0] 
+                        # print(result_tuple[0])
+                    sum = inflow[u]
+                    edge_num = 0
+                    for u,w in e_out:
+                        # print("chya",u,w)
+                        search_tuple = (u,w)
+                        result_tuple = self.getEdgeFlowAndCapacity(search_tuple)
+                        capacity = result_tuple[1]
+                        if (edge_num < len(e_out) - 1):
+                            # print("in - sum", sum)
+                            while 1:
+                                val = int(random.uniform(0,1) * sum)
+                                if val <= capacity  and val <= sum:
+                                    # print("breakingggg")
+                                    break
+                            sum = sum - val
+                            # print('updated ', u , w , val, sum)
+                            self.updateFlow(u,w, val, capacity)
+                            edge_num = edge_num + 1
+                        else:
+                            # print("inn", sum , capacity)
+                            if sum > capacity:
+                                # print("in hereeee")
+                                #change the capacity 
+                                difference = sum - capacity
+                                factor = random.randint(difference, difference + 9)
+                                self.updateFlow(u,w, sum, capacity + factor)
+                                # print('changed ', u , w , sum)
+                            else:
+                                self.updateFlow(u,w, sum, capacity)
+
+            #check if conservation is maintained
+            loop_again = 0
+            a = len(self.graph.nodes())
+            #only need to loop a - 2 times as we will not check the flow conservation for the sink and source node
+            for i in range(1,a-1):
+                # go over the edges and find all (u,v) combination that has i either in u or v
+                node_pair = self.getEdges(i)
+                # print('edges', node_pair)
+
+                # for (u,v) that has i in 1st index add the flow to inflow
+                # for (u,v) that has i in the 2nd index add the flow to outflow
+                flows = self.getFlows(node_pair, i)
+                out_flow = flows[1]
+                in_flow = flows[0]
+                if in_flow != out_flow and in_flow != 0 and out_flow != 0:
+                    # print('the flow for the node is not conserverd')
+                    # print('node in out', i, flows[0], flows[1])
+                    loop_again = 1
+                    # call the consistent function
+                # else:
+                #     print("conserved")
+                
+            if loop_again == 0:
+                # print("graph consserved")
+                break
+        
+            if count == 150:
+                # count = 0
+                # print("stuck in shoulder need to mutate")
+                for u, v in self.graph.edges():
+                    rand = random.random()
+                    if rand <=0.2:
+                        rand_int = random.randint(1,6)
+                        search_tuple = (u,v)
+                        result_flow = self.getEdgeFlowAndCapacity(search_tuple)
+                        self.updateFlow(u,v, result_flow[0] + rand_int, result_flow[1] + rand_int)
+
+            if count == 300:
+                count = 0
+                # print("generate graph again")
+                self.generateGraph(self.no_of_nodes, self.connectivity, self.increase + 150, self.seed + 150)
+
+
     def checkConservation(self):
         a = len(self.graph.nodes())
         #only need to loop a - 2 times as we will not check the flow conservation for the sink and source node
@@ -126,11 +272,11 @@ class Graph:
             out_flow = flows[1]
             in_flow = flows[0]
             if in_flow != out_flow and in_flow != 0 and out_flow != 0:
-                print('the flow for the node is not conserverd')
+                # print('the flow for the node is not conserverd')
                 print('node in out', i, flows[0], flows[1])
                 # call the consistent function
-            else:
-                print("conserved")
+            # else:
+            #     print("conserved")
 
     # search_tuple is made of nodes. 
     # (1, 2) represents the tuple of node 1 and node 2
@@ -155,7 +301,7 @@ class Graph:
         nx.draw_networkx_edges(self.graph, pos, edgelist=links, width=4)                                 # draw edges
         nx.draw_networkx_labels(self.graph, pos, font_size=20, font_family="sans-serif")                 # node labels
         edge_labels = nx.get_edge_attributes(self.graph, 'flow')                                         # edge weight labels
-        print('edge labels', edge_labels)
+        # print('edge labels', edge_labels)
         nx.draw_networkx_edge_labels(self.graph, pos, edge_labels)
         plt.show()
 
@@ -186,9 +332,10 @@ class Graph:
 
 class Agent:
     def __init__(self, no_of_nodes, connectivity, seed = 1000):
-        self.graph = Graph( no_of_nodes, connectivity, 0.01, seed)
+        self.graph = Graph( no_of_nodes, connectivity, 100, seed)
         # self.graph.simulateGraph()
-        self.graph.plotGraph()
+        self.graph.preserveConservation()
+        # self.graph.plotGraph()
         
     def heuristicFunction(self):
         # 1. calculate the heuristic value for each path and store in heuristic_value_list
@@ -197,19 +344,19 @@ class Agent:
         heuristic_value_list = []
         for p in self.graph.path:
             minn = sys.maxsize
-            print('path ', p)
+            # print('path ', p)
             # once inside the path iterate over each edges i.e the connectors between nodes
             for u,v in p:
                 search_tuple = (u,v)
                 result_tuple = self.graph.getEdgeFlowAndCapacity(search_tuple)
                 remaining_flow = result_tuple[1] - result_tuple[0]
-                print(u,v , remaining_flow)
+                # print(u,v , remaining_flow)
                 if remaining_flow == 0:
                     minn = 0
                     break
                 else:
                     minn = min(minn, remaining_flow)
-            print('heuristic value is', minn)
+            # print('heuristic value is', minn)
             heuristic_value_list.append(minn)
         # 2. find the max heuristic in the heuristic_value_list and return the path
         if np.any(heuristic_value_list):
@@ -226,34 +373,40 @@ class Agent:
         heuristic_value_list = []
         for p in self.graph.path:
             minn = sys.maxsize
-            print('path ', p)
+            # print('path ', p)
             # once inside the path iterate over each edges i.e the connectors between nodes
             for u,v in p:
                 search_tuple = (u,v)
                 result_tuple = self.graph.getEdgeFlowAndCapacity(search_tuple)
                 remaining_flow = result_tuple[1] - result_tuple[0]
-                print(u,v , remaining_flow)
+                # print(u,v , remaining_flow)
                 if remaining_flow == 0:
                     minn = 0
                     break
                 else:
                     minn = min(minn, remaining_flow)
-            print('heuristic value is', minn)
+            # print('heuristic value is', minn)
             heuristic_value_list.append(minn)
         # 2. find the max heuristic in the heuristic_value_list and return the path stocastically
         # calculate the probability of each heuristic value
         sum_array = sum(heuristic_value_list)
         probability_weight = []
 
+        # print('in')
         if sum_array != 0:
             for h in heuristic_value_list:
-                probability_weight.append(int((h/sum_array) * 100 ))
-            print(heuristic_value_list)
-            print(probability_weight)
-            result = random.choices(heuristic_value_list, weights= probability_weight, k=1)
-            heuristic_index = heuristic_value_list.index(result[0])
-            print("selected path is ", self.graph.path[heuristic_index], result[0])
-            return (self.graph.path[heuristic_index], result[0])
+                probability_weight.append(int((h*100)/sum_array))
+            # print('hvl',heuristic_value_list)
+            # print('pw',probability_weight)
+            try:
+                result = random.choices(heuristic_value_list, weights= probability_weight, k=1)
+                heuristic_index = heuristic_value_list.index(result[0])
+            # print("selected path is ", self.graph.path[heuristic_index], result[0])
+                return (self.graph.path[heuristic_index], result[0])
+            except:
+                print("exception")
+                max_heuristic_index = heuristic_value_list.index(max(heuristic_value_list))
+                return (self.graph.path[max_heuristic_index], max(heuristic_value_list))
         else:
             print("all zeross")
             return ()
@@ -270,14 +423,14 @@ class Agent:
         # do not consider the nodes that cant be reached to as edmonds karp does the same
         ignore_node = []
         for n in range(self.graph.no_of_nodes):
-            print('n is',n)
+            # print('n is',n)
             e_in = self.graph.graph.in_edges(n)
-            print(e_in)
+            # print(e_in)
             e_out = self.graph.graph.out_edges(n)
             source_node = 0
             sink_node = self.graph.no_of_nodes - 1
             if len(e_in) == 0 and n != source_node:
-                print('append ', n)
+                # print('append ', n)
                 ignore_node.append(n)
             else:
                 #check if the only in node is from the ignored node
@@ -359,15 +512,28 @@ class Agent:
         # 4. once optimized print the optimized flow
         optimised_flow = self.getOptimizedFlow()
         print('optimised flow', optimised_flow)
-
+        return (flow_value, optimised_flow)
         # 5. verify the flow with edmonds_karp algorithm
         # assert optimised_flow == flow_value
         
 if __name__ == "__main__":
-    # agent = Agent(9, 0.3) #getting more than optimal flow sometimes after using hillclimbing
-    # agent = Agent(6, 0.5) #getting more than optimal flow sometimes after using hillclimbing
-    agent = Agent(30,0.1)
-    # print('capacity',  agent.graph.graph_capacity_edges)
-    agent.graph.checkConservation()
-    agent.optimizeStostacilly()
-    
+    total_max = 0
+    total_opt = 0
+    for i in range(10):
+        print("")
+        # agent = Agent(9, 0.3) #getting more than optimal flow sometimes after using hillclimbing
+        # agent = Agent(6, 0.5) #getting more than optimal flow sometimes after using hillclimbing
+        agent = Agent(30,0.1)
+        # agent = Agent(8,0.3)
+        # print('capacity',  agent.graph.graph_capacity_edges)
+        # agent.graph.checkConservation()
+        result = agent.optimizeStostacilly()
+        total_max += result[0]
+        total_opt += result[1]
+    print(total_max/10)
+    print(total_opt/10)
+
+    # agent = Agent(30,0.1)
+    # print("outside")
+    # agent.optimizeStostacilly()
+        
