@@ -187,7 +187,7 @@ class Graph:
 class Agent:
     def __init__(self, no_of_nodes, connectivity, seed = 1000):
         self.graph = Graph( no_of_nodes, connectivity, 0.01, seed)
-        # self.graph.simulateGraph()
+        self.graph.simulateGraph()
         # self.graph.plotGraph()
         
     def heuristicFunction(self):
@@ -197,7 +197,7 @@ class Agent:
         heuristic_value_list = []
         for p in self.graph.path:
             minn = sys.maxsize
-            print('path ', p)
+            # print('path ', p)
             # once inside the path iterate over each edges i.e the connectors between nodes
             for u,v in p:
                 search_tuple = (u,v)
@@ -209,7 +209,7 @@ class Agent:
                     break
                 else:
                     minn = min(minn, remaining_flow)
-            print('heuristic value is', minn)
+            # print('heuristic value is', minn)
             heuristic_value_list.append(minn)
         # 2. find the max heuristic in the heuristic_value_list and return the path
         if np.any(heuristic_value_list):
@@ -334,14 +334,14 @@ class Agent:
           
     def optimizeStostacilly(self):
         # 1. compute the optimized flow using edmonds karp algorithm
-        # R = edmonds_karp(self.graph.graph, 0, self.graph.no_of_nodes - 1)
-        # flow_value = nx.maximum_flow_value(R, 0, self.graph.no_of_nodes - 1) 
+        R = edmonds_karp(self.graph.graph, 0, self.graph.no_of_nodes - 1)
+        flow_value3 = nx.maximum_flow_value(R, 0, self.graph.no_of_nodes - 1) 
 
         R = edmonds_karp(self.graph.graph, 0, self.graph.no_of_nodes - 1, 'capacity')
         flow_value = nx.maximum_flow_value(self.graph.graph, 0, self.graph.no_of_nodes - 1) 
         flow_value2 = nx.maximum_flow_value(R, 0, self.graph.no_of_nodes - 1) 
 
-        print('OPTIMAL FLOW', flow_value, flow_value2)
+        print('OPTIMAL FLOW', flow_value, flow_value2, flow_value3)
 
         while(1):
             # 2. compute heuristic function on each path
@@ -364,21 +364,25 @@ class Agent:
         
 if __name__ == "__main__":
 
-    max = 0
-    hill = 0
-    for i in range(10):
-        # agent = Agent(9, 0.3) #getting more than optimal flow sometimes after using hillclimbing
-        # agent = Agent(6, 0.5) #getting more than optimal flow sometimes after using hillclimbing
-        agent = Agent(30,0.1)
-        # print('capacity',  agent.graph.graph_capacity_edges)
-        agent.graph.checkConservation()
-        flows = agent.optimizeStostacilly()
-        max += flows[0]
-        hill += flows[1]
+    # max = 0
+    # hill = 0
+    # for i in range(10):
+    #     # agent = Agent(9, 0.3) #getting more than optimal flow sometimes after using hillclimbing
+    #     # agent = Agent(6, 0.5) #getting more than optimal flow sometimes after using hillclimbing
+    #     agent = Agent(30,0.1)
+    #     # print('capacity',  agent.graph.graph_capacity_edges)
+    #     agent.graph.checkConservation()
+    #     flows = agent.optimizeStostacilly()
+    #     max += flows[0]
+    #     hill += flows[1]
     
-    print(max/10)
-    print(hill/10)
+    # print(max/10)
+    # print(hill/10)
 
     # agent = Agent(30,0.1)
     # agent.graph.checkConservation()
     # flows = agent.optimizeStostacilly()
+
+    agent = Agent(9, 0.3)
+    agent.graph.checkConservation()
+    agent.optimize()
