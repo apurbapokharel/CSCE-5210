@@ -1,7 +1,7 @@
 #just gonna setup the environments and printing functions since I dont understand shit
 
 import numpy as np
-
+ 
 BOARD_ROWS = 5
 BOARD_COLS = 5
 PICK_UP_STATE = [(0,0), (1,4), (3,4), (4,0)]
