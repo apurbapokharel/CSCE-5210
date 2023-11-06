@@ -18,29 +18,40 @@ class Car:
     def __init__(self):
         self.position = (1,1)
 
-    def nxtPosition(self, action):
+    def nxtPosition(self, action, position):
         if action == "up":
-           nxtState = (self.position[0]-1, self.position[1])
+           nxtState = (position[0], position[1]+1)
         elif action == "down":
-                nxtState = (self.position[0] + 1, self.position[1])
+            nxtState = (position[0], position[1]-1)
         elif action == "left":
-                nxtState = (self.position[0], self.position[1] - 1)
+            nxtState = (position[0]-1, position[1])
         else:
-                nxtState = (self.position[0], self.position[1] + 1)
+            nxtState = (position[0]+1, position[1])
 
         if (nxtState[0] >= 0) and (nxtState[0] <= (BOARD_ROWS-1)):
             if (nxtState[1] >= 0) and (nxtState[1] <= (BOARD_COLS-1)):
-                self.position = nxtState 
-            
-        return self.position
+                return nxtState
+
+        return position
 
 class Customer:
-    def __init__(self, type):
-        self.type = type
-        if(type == 1):
+    def __init__(self, ctype, pick_up_point):
+        self.type = ctype
+        if(ctype == 1):
             self.reward = 30
         else:
             self.reward = 20
+        self.pick_up_point = self.getPickUpCoordinate(pick_up_point)
+
+    def getPickUpCoordinate(self, pick_up_point):
+        if pick_up_point == "A":
+            return (0,4)
+        elif pick_up_point == "B":
+            return (3,4)
+        elif pick_up_point == "C":
+            return (0,0)
+        else:
+            return (0,4)
         
 class Agent:
     def __init__(self):
@@ -55,16 +66,49 @@ class Agent:
                 self.u_value[(a, b)] = {}
                 for i in self.actions:
                     self.u_value[(a, b)][i] = 0
-    
-    def chooseAction(self):
-       pass
 
-    def takeAction(self, action):
+    def simulateRequirementOne(self):
+        self.customer = Customer(0, "A")
+        self.car = Car()
+        self.getStateProbability()
+        self.valueIteration(k = 10)
+    
+    def getStateProbability(self):
         pass
-
-    def play(self, rounds):
-       pass
     
+    def valueIteration(self, k):
+        while(k!=0):
+            print("k")
+            k -=1
+            for i in range(0,BOARD_ROWS):
+                for j in range(0, BOARD_COLS):
+                    coordinate = (i,j)
+                    for a in self.actions:
+                        if a=="up" or a=="down":
+                            if a=="up":
+                                #goup
+                                coordinate = self.calculateCordinate(coordinate, "up")
+                            else:
+                                #godown
+                                coordinate = self.calculateCordinate(coordinate, "down")
+
+                            left_coordinate = self.calculateCordinate(coordinate, "left")
+                            right_coordinate = self.calculateCordinate(coordinate, "right")
+
+                        else:
+                            if a=="left":
+                                #goleft
+                                coordinate = self.calculateCordinate(coordinate, "left")
+                            else:
+                                #goright
+                                coordinate = self.calculateCordinate(coordinate, "right")
+
+                            up_coordinate = self.calculateCordinate(coordinate, "up")
+                            down_coordinate = self.calculateCordinate(coordinate, "down")
+                            
+    def calculateCordinate(self, position, action):
+        return self.car.nxtPosition(action, position)
+
     def showAllUvalues(self):
         for i in range(0, BOARD_ROWS):
             print('----------------------------------')
@@ -86,18 +130,9 @@ class Agent:
                 out2 += str(dict[max_action]) + '  | '
             print(out)
             print(out2)
-            # print('----------------------------------')
-
-
-        for i in range(0, BOARD_ROWS):
-            print('----------------------------------')
-            out = '| '
-            for j in range(0, BOARD_COLS):
-                out += str(self.state_values[(i, j)]).ljust(6) + ' | '
-            print(out)
-        print('----------------------------------')
 
 if __name__ == "__main__":
     ag = Agent()
-    ag.showTrace()
+    ag.simulateRequirementOne()
+    # ag.showTrace()
     # print(ag.showValues())
