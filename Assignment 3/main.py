@@ -4,8 +4,8 @@ import numpy as np
  
 BOARD_ROWS = 5
 BOARD_COLS = 5
-PICK_UP_STATE = [(0,0), (1,4), (3,4), (4,0)]
-RESTRICTED_STATE = [(2,2), (2,3), (2,4)]
+PICK_UP_STATE = [(0,1), (0,3), (4,0), (4,4)]
+RESTRICTED_STATE = [(0,2), (1,2), (2,2)]
 
 class State:
     def __init__(self):
@@ -63,9 +63,12 @@ class Agent:
         self.u_value = {}
         for a in range(self.state.rows):
             for b in range(self.state.cols):
-                self.u_value[(a, b)] = {}
-                for i in self.actions:
-                    self.u_value[(a, b)][i] = 0
+                self.u_value[(a, b)] = 0
+        #set u value for end states
+        for a in PICK_UP_STATE:
+            self.u_value[a] = 20
+        for a in RESTRICTED_STATE:
+            self.u_value[a] = -10
 
     def simulateRequirementOne(self):
         self.customer = Customer(0, "A")
@@ -83,28 +86,39 @@ class Agent:
             for i in range(0,BOARD_ROWS):
                 for j in range(0, BOARD_COLS):
                     coordinate = (i,j)
+                    value_array = []
                     for a in self.actions:
                         if a=="up" or a=="down":
                             if a=="up":
                                 #goup
-                                coordinate = self.calculateCordinate(coordinate, "up")
+                                mcoordinate = self.calculateCordinate(coordinate, "up")
                             else:
                                 #godown
-                                coordinate = self.calculateCordinate(coordinate, "down")
+                                mcoordinate = self.calculateCordinate(coordinate, "down")
 
                             left_coordinate = self.calculateCordinate(coordinate, "left")
                             right_coordinate = self.calculateCordinate(coordinate, "right")
 
+                            #do the calculation
+                            value = 0.8 * self.u_value[mcoordinate] + 0.1 * self.u_value[left_coordinate] +  0.1 * self.u_value[right_coordinate]
                         else:
                             if a=="left":
                                 #goleft
-                                coordinate = self.calculateCordinate(coordinate, "left")
+                                mcoordinate = self.calculateCordinate(coordinate, "left")
                             else:
                                 #goright
-                                coordinate = self.calculateCordinate(coordinate, "right")
+                                mcoordinate = self.calculateCordinate(coordinate, "right")
 
                             up_coordinate = self.calculateCordinate(coordinate, "up")
                             down_coordinate = self.calculateCordinate(coordinate, "down")
+
+                            #do the calculation
+                            value = 0.8 * self.u_value[mcoordinate] + 0.1 * self.u_value[up_coordinate] +  0.1 * self.u_value[down_coordinate]
+
+                        value_array.append(value)
+                    #get the max value array and update the u value
+                    max_value = max(value_array)
+                    self.u_value[coordinate] = max_value
                             
     def calculateCordinate(self, position, action):
         return self.car.nxtPosition(action, position)
@@ -121,18 +135,24 @@ class Agent:
     def showTrace(self):
         for i in range(0, BOARD_ROWS):
             out = '| '
-            out2 = '| '
-            print('--------------------------')
+            # out2 = '| '
+            print('-------------------------------')
             for j in range(0, BOARD_COLS):
-                dict = self.u_value[(i,j)]
-                max_action = max(dict, key=dict.get)
-                out += str(max_action) + ' | '
-                out2 += str(dict[max_action]) + '  | '
+                value = round(self.u_value[(i,j)],2)
+                
+                if value == 0:
+                    out+= '0   | '
+                elif value<0:
+                    out+= str(value)  + ' | '
+                else:
+                    out += str(value) + '  | '
+                # out2 += str(dict[max_action]) + '  | '
             print(out)
-            print(out2)
+            # print(out2)
 
 if __name__ == "__main__":
     ag = Agent()
+    ag.showTrace()
     ag.simulateRequirementOne()
-    # ag.showTrace()
+    ag.showTrace()
     # print(ag.showValues())
