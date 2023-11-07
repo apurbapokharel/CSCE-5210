@@ -7,12 +7,19 @@ import numpy as np
 # PICK_UP_STATE = [(0,1), (0,3), (4,0), (4,4)]
 # RESTRICTED_STATE = [(0,2), (1,2), (2,2)]
 
-BOARD_ROWS = 3
-BOARD_COLS = 3
-PICK_UP_STATE = [(0,2)]
-RESTRICTED_STATE = [(1,2)]
-GAMMA = 0.9
+# BOARD_ROWS = 3
+# BOARD_COLS = 3
+# PICK_UP_STATE = [(0,2)]
+# RESTRICTED_STATE = [(1,2)]
+# GAMMA = 0.9
 
+# Simulating the lecture value iteration
+BOARD_ROWS = 3
+BOARD_COLS = 4
+PICK_UP_STATE = [(0,3)]
+RESTRICTED_STATE = [(1,3)]
+GAMMA = 0.9
+BLOCKED_STATE = [(1,1)]
 class State:
     def __init__(self):
         self.rows = BOARD_ROWS
@@ -37,6 +44,10 @@ class Car:
         if (nxtState[0] >= 0) and (nxtState[0] <= (BOARD_ROWS-1)):
             if (nxtState[1] >= 0) and (nxtState[1] <= (BOARD_COLS-1)):
                 return nxtState
+            
+        for a in BLOCKED_STATE:
+            if a == nxtState:
+                return position
 
         return position
 
@@ -44,20 +55,20 @@ class Customer:
     def __init__(self, ctype, pick_up_point):
         self.type = ctype
         if(ctype == 1):
-            self.reward = 30
+            self.reward = 1.5
         else:
-            self.reward = 20
-        self.pick_up_point = self.getPickUpCoordinate(pick_up_point)
+            self.reward = 1
+        # self.pick_up_point = self.getPickUpCoordinate(pick_up_point)
 
-    def getPickUpCoordinate(self, pick_up_point):
-        if pick_up_point == "A":
-            return (0,4)
-        elif pick_up_point == "B":
-            return (3,4)
-        elif pick_up_point == "C":
-            return (0,0)
-        else:
-            return (0,4)
+    # def getPickUpCoordinate(self, pick_up_point):
+    #     if pick_up_point == "A":
+    #         return (0,4)
+    #     elif pick_up_point == "B":
+    #         return (3,4)
+    #     elif pick_up_point == "C":
+    #         return (0,0)
+    #     else:
+    #         return (0,4)
         
 class Agent:
     def __init__(self):
@@ -72,25 +83,43 @@ class Agent:
                 self.u_value[(a, b)] = 0
         #set u value for end states
         for a in PICK_UP_STATE:
-            self.u_value[a] = 20
+            self.u_value[a] = 1
         for a in RESTRICTED_STATE:
-            self.u_value[a] = -10
+            self.u_value[a] = -1
 
     def simulateRequirementOne(self):
         self.customer = Customer(0, "A")
         self.car = Car()
         self.getStateProbability()
-        self.valueIteration(k = 100)
+        self.valueIteration(k = 10)
     
     def getStateProbability(self):
         pass
     
+    def isReward(self, coordinate):
+        for a in PICK_UP_STATE:
+            if a == coordinate:
+                return True
+            
+    def isRestricted(self, coordinate):
+        for a in RESTRICTED_STATE:
+            if a == coordinate:
+                return True  
+
+    def isBlocked(self, coordinate):
+        for a in BLOCKED_STATE:
+            if a == coordinate:
+                return True   
+            
     def valueIteration(self, k):
         while(k!=0):
             k -=1
             for i in range(0,BOARD_ROWS):
                 for j in range(0, BOARD_COLS):
+                    print("------")
                     coordinate = (i,j)
+                    if self.isReward(coordinate) or self.isRestricted(coordinate) or self.isBlocked(coordinate):
+                        continue
                     value_array = []
                     for a in self.actions:
                         if a=="up" or a=="down":
@@ -123,7 +152,7 @@ class Agent:
                         value_array.append(value)
                     #get the max value array and update the u value
                     max_value = max(value_array)
-                    value = -0.5 + GAMMA * max_value
+                    value = 0 + GAMMA * max_value
                     self.u_value[coordinate] = value
                     print("for i ,j", i , j , " the value is", value)
 
