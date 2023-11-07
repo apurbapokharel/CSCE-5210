@@ -2,10 +2,16 @@
 
 import numpy as np
  
-BOARD_ROWS = 5
-BOARD_COLS = 5
-PICK_UP_STATE = [(0,1), (0,3), (4,0), (4,4)]
-RESTRICTED_STATE = [(0,2), (1,2), (2,2)]
+# BOARD_ROWS = 5
+# BOARD_COLS = 5
+# PICK_UP_STATE = [(0,1), (0,3), (4,0), (4,4)]
+# RESTRICTED_STATE = [(0,2), (1,2), (2,2)]
+
+BOARD_ROWS = 3
+BOARD_COLS = 3
+PICK_UP_STATE = [(0,2)]
+RESTRICTED_STATE = [(1,2)]
+GAMMA = 0.9
 
 class State:
     def __init__(self):
@@ -16,7 +22,7 @@ class State:
      
 class Car:
     def __init__(self):
-        self.position = (1,1)
+        self.position = (0,1)
 
     def nxtPosition(self, action, position):
         if action == "up":
@@ -74,14 +80,13 @@ class Agent:
         self.customer = Customer(0, "A")
         self.car = Car()
         self.getStateProbability()
-        self.valueIteration(k = 10)
+        self.valueIteration(k = 100)
     
     def getStateProbability(self):
         pass
     
     def valueIteration(self, k):
         while(k!=0):
-            print("k")
             k -=1
             for i in range(0,BOARD_ROWS):
                 for j in range(0, BOARD_COLS):
@@ -118,7 +123,10 @@ class Agent:
                         value_array.append(value)
                     #get the max value array and update the u value
                     max_value = max(value_array)
-                    self.u_value[coordinate] = max_value
+                    value = -0.5 + GAMMA * max_value
+                    self.u_value[coordinate] = value
+                    print("for i ,j", i , j , " the value is", value)
+
                             
     def calculateCordinate(self, position, action):
         return self.car.nxtPosition(action, position)
