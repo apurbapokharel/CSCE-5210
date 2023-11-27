@@ -7,20 +7,6 @@ PICK_UP_STATE = [(0,1), (0,3), (4,0), (4,4)]
 RESTRICTED_STATE = [(1,2)]
 GAMMA = 0.9
 
-# BOARD_ROWS = 3
-# BOARD_COLS = 3
-# PICK_UP_STATE = [(0,2)]
-# RESTRICTED_STATE = [(1,2)]
-# GAMMA = 0.9
-
-# Simulating the lecture value iteration
-# BOARD_ROWS = 3
-# BOARD_COLS = 4
-# PICK_UP_STATE = [(0,3)]
-# RESTRICTED_STATE = [(1,3)]
-# GAMMA = 0.9
-# BLOCKED_STATE = [(1,1)]
-
 class State:
     def __init__(self):
         self.rows = BOARD_ROWS
@@ -331,7 +317,7 @@ class Agent:
                         value_array.append(value)
                     #get the max value array and update the u value
                     max_value = max(value_array)
-                    value = -0.2 + GAMMA * max_value
+                    value = -0.1 + GAMMA * max_value
                     old_value = self.u_value[coordinate]
                     if abs(old_value - value) > self.difference_factor:
                         end_loop = False
